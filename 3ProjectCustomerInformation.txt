@@ -1,0 +1,155 @@
+
+**************************Informatica Developer Tool Projects***************************
+________________[Shaker Sami]____[Data Engineer]____[shaker.samiy@gmail.com]____[+201036497664  +201119396597]____ 
+
+LastUpdate Date:15 May 2026
+______________________________ ETL project for master sorter,joiner, filter and aggregator transformations_____________________
+
+Project Scope:
+	In this project you will learn to join data of customers from two tables that exists in flat files, 
+	Then filter the data on state and get count of cutomers in each code area in this state,
+	Finally store the data into rational database.
+Data Source: 
+	Name:
+		customer_feedback.csv  (source1)
+		full_customers.csv     (source2)
+	Type: flat file
+	Description:
+		Columns of (customer_feedback.csv):
+			customer_id
+			feedback_text
+			feedback_category
+			sentiment
+			complaint_intensity
+			
+		Columns of (full_customers.csv):
+			customer_id	state
+			account_length
+			area_code
+			international_plan
+			voice_mail_plan
+			number_vmail_messages
+			total_day_minutes (droped)
+			total_day_calls (droped)
+			total_day_charge (droped)
+			total_eve_minutes (droped)
+			total_eve_calls (droped)
+			total_eve_charge (droped)
+			total_night_minutes (droped)
+			total_night_calls (droped)
+			total_night_charge (droped)
+			total_intl_minutes (droped)
+			total_intl_calls (droped)
+			total_intl_charge (droped)
+			customer_service_calls (droped)
+			churn (droped)
+			split (droped)
+			has_international_plan (droped)
+			has_voice_mail_plan	total_minutes (droped) 
+			total_calls	total_charges (droped)
+			avg_charge_per_minute (droped)
+			support_call_rate (droped)
+			high_service_calls (droped)
+			usage_intensity (droped)
+			customer_value_segment (droped)
+			rule_based_churn_risk_score (droped)
+			rule_based_churn_risk_level (droped)
+_________________________________________________________________________	
+Transformations Types:
+	-Sort Transformation
+	-Joiner Transformation
+	-Aggregator Transformation
+_________________________________________________________________________  
+
+Files Description:
+	1- 1OriginalSourc1.png: original data source 
+	2- 1OriginalSourc2.png: original data source 
+	3- 2Source1Befor.png:   data in developer tool befora any chaning 
+	4- 2Source2Befor.png	data in developer tool befora any chaning 
+	5- 3SRT1_CT&5SRT2_CT.png: shot for the tow sorters transformation and its port configuration 
+	6- 4JN_CT.png: shot for joinner transformataion[JN_CT] and its output 
+	7- 5FIL_CT.png: shot for filter transformataion[FIL_CT] and its output 
+	8- 6AGG_CT.png: shot for Aggregator transformataion[AGG_CT] and its port configuration 
+	9- 7AGG_CT_output.png: shot for Aggregator transformataion[AGG_CT] output
+	10- 8ProjectStructure.png: directory contains for the project
+	11- 9TGT_CUSTAGG.png: shot contains the output data into the table after running the map
+	12- 10FullMapStructure.png: full map overview
+	A_Appendex_dataTypeConversion.png: table that represent data type and its length and formate according to inforamtica documentation
+	B_Appendex_nameConvesion_data_Transformation.png: name cnvesion for transformation according informatica documentation
+________________________________________________________________________  
+
+Business Requirements:
+	1- sort the data in the two tables.
+	2- Join the data of the customers of into one table bases on the customer ID
+	3- Filter the data on the state= 'KS'
+	4- Find Count of customers where state = 'KS', for each area in the state
+	5- Save the counts into a rational database 
+________________________________________________________________________  
+
+Extra:
+	5- Find total customers with international Plan
+	6- Find total customers without voice_mail_plan
+	7- Find average for number_vmail_messages
+________________________________________________________________________  
+
+Steps:
+1- create new project folder[Project_CustomersInformation]   
+2- create new folder inside that project file[DirCustomersInformation]  
+3- create new data object and get the source1 dataset flat file[SRC1_customer_feedback]  
+4- Get the source2 dataset flat file[SRC2_full_customers]
+5- Create a map [m_CustomersInformation] 
+6- Import the two sources [[SRC1_customer_feedback],[SRC2_full_customers]] flat files into the map as read
+7- check data types for each column and its lengths:
+	source1 data type Conversion 
+		customer_id: string(11)->string(11)
+		feedback_text: string->string 
+		feedback_category: string->string
+		sentiment: string->string
+		complaint_intensity:number->int    Note:This value repesent ordinal Qualitative (Categorical)
+		
+	source2 data type Conversion	
+		customer_id: string(11)->string(11)
+		state: string(2)->string(2)
+		account_length: number->string(10)
+		area_code: number->string(3)
+		international_plan: string(3)->string(3)
+		voice_mail_plan: string(3)->string(3)
+		number_vmail_messages: number->int(10)
+
+8- use sorter transformataion[SRT1_CT] --Note CT: CustomersTransformation 
+9- use sorter transformataion[SRT2_CT] D
+
+10- In sorter transforamtion[SRT1_CT] properties Tab: 
+		ports: check data type and their length according to the column data type conversion used in step 5
+ 		sort: choose (customer_id) for ascending order
+
+11- In sorter transforamtion[SRT2_CT] properties Tab:D
+		ports: check data type and their length according to the column data type conversion used in step 5
+ 		sort: choose (customer_id) for ascending order
+
+12- Create the joiner[JN_CT] between the two sorter: 
+	in the properties tab of the joiner
+		grneral: [Name:JN_CT]
+		join: [join type:Normal]
+			  join condition: [customer_id1=customer_id]
+		Advanced:[sorted_input checked]
+		
+13- Create the filter transformation [FIL_CT]:
+	use all the ports as input for the filter transformation
+    use [state='KS'] as filter condition                                
+					
+14- Create the aggregator[AGG_CT]:
+	use all the ports as input for the filter transformation
+	create a new port [CNT_CUSOMERS] with output only, and expression [COUNT(customer_id)]
+	group by: area_code port
+15- create a table [CustAgg] in relational database as follows:
+	CREATE TABLE CustAgg(customerID VARCHAR(20), CNT_CUSOTMERS INT, AREA_CODE CHAR(3));
+	
+16- create a relational database connection in informatica developer with a database that contains that table[CustAgg] 
+17- Insert the table[CustAgg] into the map as write in the map [m_CustomersInformation]
+18- Run the map [m_CustomersInformation]
+19- Check the output into the table CustAgg(customerID 
+
+			
+			
+	
